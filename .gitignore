@@ -1,0 +1,22 @@
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# LaTeX
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.fls
+*.fdb_latexmk
+
+# Simulation data
+**/processed/
+**/ovito_final/
+
+# OS/editor
+.DS_Store

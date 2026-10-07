@@ -1,0 +1,472 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\IfFileExists{spanish.ldf}{%
+  \usepackage[spanish,es-nodecimaldot]{babel}
+}{%
+  \usepackage{babel}
+}
+\usepackage{amsmath,amssymb,bm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs,longtable,array}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{3em}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\Id}{\mathbf{I}}
+\title{Modelo de movimiento colectivo celular\\Unidades y guía de elección de parámetros}
+\author{Documento de trabajo}
+\date{}
+\begin{document}
+\maketitle
+
+\section{Objetivo}
+
+En este documento vamos a mostrar los parámetros que debemos elegir para las simulaciones.
+
+\section{Geometría, superposición y vecinos}
+
+Lo primero que podemos pensar es en qué momento consideramos que dos células interactúan. Para eso, recordemos primero algunas definiciones del modelo.
+
+Todas las células conservan un área $a=\pi R^2$, donde $R$ es el radio de una célula redonda. Para una relación de aspecto $\phi_i\geq1$, los semiejes son
+
+\begin{equation}
+ \ell_{\parallel,i}=R\sqrt{\phi_i},\qquad
+ \ell_{\perp,i}=\frac{R}{\sqrt{\phi_i}}.
+\end{equation}
+
+La posición y orientación son $\bm r_i$ y $\varphi_i$. Definimos
+
+\begin{equation}
+ \alpha_i=\ell_{\parallel,i}^{2}+\ell_{\perp,i}^{2},\qquad
+ \epsilon_i=\frac{\phi_i^2-1}{\phi_i^2+1},\qquad
+ \bm Q_i=\begin{pmatrix}
+ \cos2\varphi_i&\sin2\varphi_i\\\sin2\varphi_i&-\cos2\varphi_i
+ \end{pmatrix}.
+\end{equation}
+
+Para $\bm r_{ij}=\bm r_i-\bm r_j$:
+
+\begin{equation}
+ \bm M_{ij}=\frac{\alpha_i\epsilon_i\bm Q_i+\alpha_j\epsilon_j\bm Q_j}{\alpha_i+\alpha_j},
+ \qquad
+ \beta_{ij}=(\alpha_i+\alpha_j)^2-(\alpha_i\epsilon_i-\alpha_j\epsilon_j)^2
+ -4\alpha_i \alpha_j\epsilon_i\epsilon_j\cos^2(\varphi_i-\varphi_j).
+\end{equation}
+
+Introducimos la matriz:
+\begin{equation}
+ \bm G_{ij}=\frac{\alpha_i+\alpha_j}{\beta_{ij}}(\Id-\bm M_{ij}).
+\end{equation}
+
+La superposición entre dos células es entonces:
+\begin{equation}
+	I_{ij}=I_{ij}^{0}\xi_{ij}
+\end{equation}
+
+Donde $I_{ij}^{0}$ es el máximo para esas formas y orientaciones,y $\xi_{ij}$ la superposición normalizada:
+
+\begin{equation}
+ I_{ij}^{0}=\frac{4a^2}{\pi\sqrt{\beta_{ij}}},\qquad
+ \xi_{ij}=\frac{I_{ij}}{I_{ij}^{0}}
+ =\exp(-\bm r_{ij}^{\mathsf T}\bm G_{ij}\bm r_{ij}).
+\end{equation}
+
+Definimos que dos células interactúan cuando la superposición normalizada excede un umbral:
+
+\begin{equation}
+ \boxed{\xi_{ij}>\xi_{\mathrm{cut}}.}
+\end{equation}
+
+Por lo tanto, debemos elegir $\xi_{\mathrm{cut}}$. La justificación de la elección se desarrolla en el análisis de vecinos.
+
+Para buscar los vecinos, nos limitamos a buscar en la grilla espacial que selecciona candidatos antes de evaluar $\xi_{ij}$. Su alcance debe cubrir todas las parejas que puedan superar el umbral, basta un alcance
+
+\begin{equation}
+ r_{\mathrm{cut}}^{\max}
+ =2R\sqrt{\phi_{\max}[-\ln(\xi_{\mathrm{cut}})]}.
+\end{equation}
+
+La implementación periódica
+requiere al menos tres celdas de grilla por eje.
+
+\section{Interacción, fuerza y torque}
+
+Definimos la energía de interacción como:
+\begin{equation}
+ u_\lambda(\xi)=\kappa\left[(1-\lambda)\xi^\gamma
+ -\lambda\ln(1-\xi^\gamma)\right],\qquad 0\leq\lambda\leq1.
+\end{equation}
+
+Obtenemos la fuerza y el torque de la siguiente forma:
+\begin{equation}
+ \bm f_{ij}=-\nabla_{\bm r_{ij}}u_\lambda,\qquad
+ \tau_{ij}=-\partial_{\varphi_i}u_\lambda.
+\end{equation}
+Definiendo
+\begin{equation}
+ B_\lambda(\xi)=1+\lambda\frac{\xi^\gamma}{1-\xi^\gamma},
+\end{equation}
+resulta
+\begin{equation}
+ \bm f_{ij}=2\kappa\gamma\xi_{ij}^{\gamma}B_\lambda(\xi_{ij})
+ \bm G_{ij}\bm r_{ij},
+\end{equation}
+\begin{equation}
+ \tau_{ij}=\kappa\gamma\xi_{ij}^{\gamma}B_\lambda(\xi_{ij})\bm r_{ij}^{\mathsf T} \frac{\partial\bm G_{ij}}{\partial\varphi_i}\bm r_{ij}.
+\end{equation}
+
+El origen de la regularización y su comportamiento a distancias cortas se
+discuten en el documento de fuerzas.
+
+\section{Movimiento y elección de unidades}
+
+La dinámica es sobreamortiguada. Definimos los vectores
+\begin{equation}
+	\bm e_i=(\cos\varphi_i,\sin\varphi_i),
+	\qquad
+	\bm e_i^\perp=(-\sin\varphi_i,\cos\varphi_i),
+\end{equation}
+que indican las direcciones paralela y perpendicular al eje
+de autopropulsión de la célula.
+
+La parte determinista de las ecuaciones de movimiento es
+\begin{equation}
+	\frac{\mathrm{d}\bm r_i}{\mathrm{d}t}
+	=
+	v_e h(\phi_i)\bm e_i
+	+
+	\bm\mu_i
+	\sum_{j\in\Omega_i}\bm f_{ij},
+	\label{eq:dimensional_translation}
+\end{equation}
+\begin{equation}
+	\frac{\mathrm{d}\varphi_i}{\mathrm{d}t}
+	=
+	\mu_{r,i}
+	\sum_{j\in\Omega_i}\tau_{ij},
+	\label{eq:dimensional_rotation}
+\end{equation}
+donde
+\begin{equation}
+	h(\phi_i)=\frac{\phi_i-1}{\phi_{\max}-1}.
+\end{equation}
+En el modelo instantáneo, $h=0$ para las células redondas
+y $h=1$ para las elongadas. Por tanto, $v_e$ es la velocidad
+de autopropulsión de una célula completamente elongada,
+no necesariamente su velocidad total.
+
+\subsection{Escalas de movilidad e interacción}
+
+Sea $\mu_0$ la movilidad traslacional de referencia de una
+célula redonda. Separamos la escala dimensional de movilidad
+de su dependencia con la forma:
+\begin{equation}
+	\bm\mu_i=\mu_0\bm m_i,
+	\qquad
+	\mu_{r,i}=\frac{\mu_0}{R^2}m_r(\phi_i),
+\end{equation}
+con
+\begin{equation}
+	\bm m_i
+	=
+	m_\parallel(\phi_i)\bm e_i\bm e_i^{\mathsf T}
+	+
+	m_\perp(\phi_i)\bm e_i^\perp
+	(\bm e_i^\perp)^{\mathsf T}.
+\end{equation}
+Las funciones $m_\parallel$, $m_\perp$ y $m_r$ son
+adimensionales.
+
+La energía de interacción puede escribirse como
+\begin{equation}
+	u_{ij}=\kappa\,U_{ij},
+\end{equation}
+donde $\kappa$ tiene unidades de energía y $U_{ij}$ es una función adimensional de la geometría relativa, $\gamma$ y $\lambda$.
+
+Introducimos las posiciones adimensionales
+\begin{equation}
+	\widetilde{\bm r}_i=\frac{\bm r_i}{R}.
+\end{equation}
+Como
+\begin{equation}
+	\nabla_{\bm r_i}
+	=
+	\frac{1}{R}\nabla_{\widetilde{\bm r}_i},
+\end{equation}
+la fuerza y el torque toman la forma
+\begin{equation}
+	\bm f_{ij}
+	=
+	\frac{\kappa}{R}\bm F_{ij},
+	\qquad
+	\bm F_{ij}
+	=
+	-\nabla_{\widetilde{\bm r}_i}U_{ij},
+\end{equation}
+\begin{equation}
+	\tau_{ij}=\kappa\,T_{ij},
+	\qquad
+	T_{ij}=-\frac{\partial U_{ij}}{\partial\varphi_i}.
+\end{equation}
+La fuerza contiene un factor $1/R$ por la derivada espacial.
+El torque no lo contiene porque el ángulo es adimensional.
+
+\subsection{Reescalado de las ecuaciones de movimiento}
+
+Elegimos como unidad temporal el tiempo que una célula
+con velocidad de autopropulsión $v_e>0$ tarda en recorrer
+una distancia $R$:
+\begin{equation}
+	t_0=\frac{R}{v_e},
+	\qquad
+	\widetilde t=\frac{t}{t_0}=\frac{v_e}{R}t.
+\end{equation}
+Entonces,
+\begin{equation}
+	\frac{\mathrm{d}\bm r_i}{\mathrm{d}t}
+	=
+	v_e
+	\frac{\mathrm{d}\widetilde{\bm r}_i}
+	{\mathrm{d}\widetilde t},
+	\qquad
+	\frac{\mathrm{d}\varphi_i}{\mathrm{d}t}
+	=
+	\frac{v_e}{R}
+	\frac{\mathrm{d}\varphi_i}{\mathrm{d}\widetilde t}.
+\end{equation}
+
+Sustituyendo las escalas de fuerza y movilidad en
+la ecuación traslacional, obtenemos
+\begin{equation}
+	v_e
+	\frac{\mathrm{d}\widetilde{\bm r}_i}
+	{\mathrm{d}\widetilde t}
+	=
+	v_e h(\phi_i)\bm e_i
+	+
+	\frac{\mu_0 \kappa}{R}
+	\bm m_i
+	\sum_{j\in\Omega_i}\bm F_{ij}.
+\end{equation}
+Dividiendo por $v_e$,
+\begin{equation}
+	\frac{\mathrm{d}\widetilde{\bm r}_i}
+	{\mathrm{d}\widetilde t}
+	=
+	h(\phi_i)\bm e_i
+	+
+	\frac{\mu_0 \kappa}{Rv_e}
+	\bm m_i
+	\sum_{j\in\Omega_i}\bm F_{ij}.
+	\label{eq:scaled_translation}
+\end{equation}
+
+Para la orientación, el mismo procedimiento da
+\begin{equation}
+	\frac{v_e}{R}
+	\frac{\mathrm{d}\varphi_i}{\mathrm{d}\widetilde t}
+	=
+	\frac{\mu_0 \kappa}{R^2}
+	m_r(\phi_i)
+	\sum_{j\in\Omega_i}T_{ij}.
+\end{equation}
+Multiplicando por $R/v_e$,
+\begin{equation}
+	\frac{\mathrm{d}\varphi_i}{\mathrm{d}\widetilde t}
+	=
+	\frac{\mu_0 \kappa}{Rv_e}
+	m_r(\phi_i)
+	\sum_{j\in\Omega_i}T_{ij}.
+	\label{eq:scaled_rotation}
+\end{equation}
+
+Por tanto, ambas ecuaciones contienen el mismo
+acoplamiento adimensional:
+\begin{equation}
+	\boxed{
+		\widetilde\kappa=\frac{\mu_0 \kappa}{Rv_e}
+	}.
+	\label{eq:kappa_definition}
+\end{equation}
+
+Las ecuaciones deterministas quedan
+\begin{equation}
+	\boxed{
+		\frac{\mathrm{d}\widetilde{\bm r}_i}
+		{\mathrm{d}\widetilde t}
+		=
+		h(\phi_i)\bm e_i
+		+
+		\widetilde\kappa\bm m_i
+		\sum_{j\in\Omega_i}\bm F_{ij}
+	},
+\end{equation}
+\begin{equation}
+	\boxed{
+		\frac{\mathrm{d}\varphi_i}{\mathrm{d}\widetilde t}
+		=
+		\widetilde\kappa m_r(\phi_i)
+		\sum_{j\in\Omega_i}T_{ij}
+	}.
+\end{equation}
+
+Por lo tanto, en el código podemos fijar el radio de las células redondas y la velocidad de autopropulsión de las elongadas a uno:
+
+\begin{equation}
+	\widetilde R=1,
+	\qquad
+	\widetilde v_e=1.
+\end{equation}
+
+Estos dejan de aparecer como un parámetro independiente de las ecuaciones deterministas: su efecto relativo a la interacción queda incorporado en $\widetilde\kappa$.
+
+A $R$ y $\mu_0$ fijos, aumentar $\kappa$ incrementa $\widetilde\kappa$, mientras que aumentar $v_e$ lo reduce. Así, $\widetilde\kappa$ compara la escala de velocidad inducida por las interacciones, $\mu_0\kappa/R$, con la velocidad de autopropulsión.
+
+\subsection{Relación con los parámetros del código}
+
+Entonces si en las simulaciones elegimos $\widetilde R=\widetilde v_e=1$, el parámetro \texttt{kRep} representa numéricamente $\widetilde \kappa$.
+
+\subsection{Reescalado del ruido}
+
+Para explicitar también el cambio de unidades del ruido,
+consideramos coeficientes dimensionales de difusión
+\begin{equation}
+	D_{\parallel,i}=D_0m_\parallel(\phi_i),
+	\qquad
+	D_{\perp,i}=D_0m_\perp(\phi_i),
+	\qquad
+	D_{r,i}=D_{r,0}m_r(\phi_i).
+\end{equation}
+Los incrementos aleatorios durante un intervalo
+$\Delta t$ se escriben como
+\begin{equation}
+	\begin{split}
+		\Delta\bm r_{i,\mathrm{ruido}}
+		={}&
+		\sqrt{2D_0m_\parallel\Delta t}\,
+		Z_\parallel\bm e_i\\
+		&+
+		\sqrt{2D_0m_\perp\Delta t}\,
+		Z_\perp\bm e_i^\perp,
+	\end{split}
+\end{equation}
+\begin{equation}
+	\Delta\varphi_{i,\mathrm{ruido}}
+	=
+	\sqrt{2D_{r,0}m_r\Delta t}\,Z_r,
+\end{equation}
+donde las variables $Z_\parallel$, $Z_\perp$ y $Z_r$
+son normales estándar independientes en cada paso
+y para cada célula.
+
+Usando
+\begin{equation}
+	\Delta t=\frac{R}{v_e}\Delta\widetilde t,
+	\qquad
+	\Delta\widetilde{\bm r}=\frac{\Delta\bm r}{R},
+\end{equation}
+obtenemos
+\begin{equation}
+	\begin{split}
+		\Delta\widetilde{\bm r}_{i,\mathrm{ruido}}
+		={}&
+		\sqrt{\frac{2D_0}{Rv_e}}\,
+		\sqrt{m_\parallel\Delta\widetilde t}\,
+		Z_\parallel\bm e_i\\
+		&+
+		\sqrt{\frac{2D_0}{Rv_e}}\,
+		\sqrt{m_\perp\Delta\widetilde t}\,
+		Z_\perp\bm e_i^\perp,
+	\end{split}
+\end{equation}
+\begin{equation}
+	\Delta\varphi_{i,\mathrm{ruido}}
+	=
+	\sqrt{
+		2\frac{D_{r,0}R}{v_e}
+		m_r\Delta\widetilde t
+	}\,Z_r.
+\end{equation}
+
+Definimos entonces los parámetros de ruido del código:
+\begin{equation}
+	\boxed{
+		\eta^2=\frac{2D_0}{Rv_e},
+		\qquad
+		d_\varphi=\frac{D_{r,0}R}{v_e}
+	}.
+\end{equation}
+Aquí $\eta$ corresponde a \texttt{noise\_eta} y
+$d_\varphi$ a \texttt{d\_phi}. La difusividad angular
+adimensional efectiva es $d_\varphi m_r$.
+
+Así, en presencia de ruido, la dependencia con $v_e$
+queda incorporada no solamente en $\kappa$, sino
+también en los parámetros adimensionales del ruido.
+Cambiar $v_e$ manteniendo fijos los coeficientes
+dimensionales de difusión modifica esos parámetros.
+
+\subsection{Paso temporal y período de deformación}
+
+También debemos estudiar el paso temporal de integración y un paso temporal que nos diga cada cuánto tiempo se intentan deformar las células. Expresándo esto en las mismas unidades:
+
+\begin{equation}
+	\Delta\widetilde t=\frac{v_e}{R}\Delta t,
+	\qquad
+	\widetilde T_{\mathrm{def}}
+	=\frac{v_e}{R}T_{\mathrm{def}}.
+\end{equation}
+
+\subsection{Conclusión}
+
+Los parámetros relativos a la fuerza y las ecuaciones de movimiento que debemos estudiar para ver cómo varía el sistema son:
+\begin{equation}
+	\widetilde \kappa, \qquad \gamma, \qquad \lambda, \qquad \eta, \qquad d_\varphi, \qquad \Delta \widetilde t, \qquad \widetilde T_{def} 
+\end{equation}
+
+Mientras que quedan fijados:
+
+\begin{equation}
+	\widetilde R=1,
+	\qquad
+	\widetilde v_e=1.
+\end{equation}
+
+\section{Reglas de deformación}
+En cada barrido de deformación, una célula redonda prueba $n_{\mathrm{int}}$
+orientaciones. Cada propuesta parte del mismo estado original, desplaza
+el centro en la dirección propuesta una distancia igual al aumento del
+semieje mayor y conserva el área. Se admite si
+\begin{equation}
+ \max_{j\in\mathcal C_p}\xi_{ij}^{(p)}\leq\xi_{\mathrm{cut}},
+\end{equation}
+
+donde $\mathcal C_p$ es el conjunto de candidatos de la grilla para la propuesta. Entre las propuestas válidas se elige la de menor máximo; los empates se sortean. Por tanto, aumentar $n_{\mathrm{int}}$ puede modificar tanto la probabilidad de elongación como la posición seleccionada.
+
+La contracción se solicita cuando la velocidad determinista proyectada sobre el eje de autopropulsión no es positiva. Se propone mantener el centro y reducir la relación de aspecto. Si se activa la condición de seguridad, se rechaza cuando el máximo normalizado de la configuración propuesta supera $\xi_{\mathrm{safe}}$.
+
+\section{Estado de las decisiones}
+\small
+\begin{longtable}{p{0.20\textwidth}p{0.26\textwidth}p{0.44\textwidth}}
+\toprule
+Cantidad & Estado o valor & Justificación y trabajo pendiente \\
+\midrule
+\endhead
+$\widetilde R$, $\widetilde v_e$ & $1$, $1$ & Fijos por el reescaleo. \\
+$\phi_{\max}$ & $2.7$ & Motivación experimental. \\
+$\gamma$ & $3$ & Valor usado en papers anteriores. \\
+$\xi_{\mathrm{cut}}$ & $e^{-1}$ & Concuerda mucho con la distancia de interacción, desarrollado en el análisis de vecinos. \\
+$\lambda$ & $0.1$ & Candidato motivado por el umbral teórico de monotonía, desarrollado en el análisis de fuerzas. \\
+$\xi_{\mathrm{safe}}$ & $0.8$ & Cercano al punto problemático, desarrollado en el análisis de fuerzas. \\
+$\kappa$ & Por elegir & . \\
+$\eta$, $d_\varphi$ & Por documentar/elegir & . \\
+Condición inicial & Aleatoria, redondas; $t_{\mathrm{stab}}=0$ & Protocolo principal. Sus transitorios forman parte del análisis desde el tiempo inicial. \\
+Deformación & Instantánea & Elegido como un primer modelo. \\
+$n_{\mathrm{int}}$ & Por elegir & . \\
+Período de deformación & Por fijar & . \\
+$\Delta t$ & $0.05$, exploratorio & Validar convergencia para los valores de interacción seleccionados; no asumir estabilidad para cualquier $\kappa$. \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\end{document}
