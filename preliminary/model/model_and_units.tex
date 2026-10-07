@@ -419,12 +419,11 @@ También debemos estudiar el paso temporal de integración y un paso temporal qu
 
 \subsection{Conclusión}
 
-Los parámetros relativos a la fuerza y las ecuaciones de movimiento que debemos estudiar para ver cómo varía el sistema son:
-\begin{equation}
-	\widetilde \kappa, \qquad \gamma, \qquad \lambda, \qquad \eta, \qquad d_\varphi, \qquad \Delta \widetilde t, \qquad \widetilde T_{def} 
-\end{equation}
+El reescalado permite separar las cantidades que fijan las unidades,
+los parámetros propios del modelo, los parámetros numéricos y las
+variables de control que se explorarán posteriormente.
 
-Mientras que quedan fijados:
+Las unidades se fijan mediante
 
 \begin{equation}
 	\widetilde R=1,
@@ -432,41 +431,216 @@ Mientras que quedan fijados:
 	\widetilde v_e=1.
 \end{equation}
 
-\section{Reglas de deformación}
-En cada barrido de deformación, una célula redonda prueba $n_{\mathrm{int}}$
-orientaciones. Cada propuesta parte del mismo estado original, desplaza
-el centro en la dirección propuesta una distancia igual al aumento del
-semieje mayor y conserva el área. Se admite si
+El parámetro de interacción que aparece en las ecuaciones
+adimensionales es
+
 \begin{equation}
- \max_{j\in\mathcal C_p}\xi_{ij}^{(p)}\leq\xi_{\mathrm{cut}},
+	\widetilde\kappa
+	=
+	\frac{\mu_0\kappa}{Rv_e}.
 \end{equation}
 
-donde $\mathcal C_p$ es el conjunto de candidatos de la grilla para la propuesta. Entre las propuestas válidas se elige la de menor máximo; los empates se sortean. Por tanto, aumentar $n_{\mathrm{int}}$ puede modificar tanto la probabilidad de elongación como la posición seleccionada.
+En el código, una vez fijadas las unidades anteriores,
+\texttt{kRep} representa numéricamente
+$\widetilde\kappa$.
 
-La contracción se solicita cuando la velocidad determinista proyectada sobre el eje de autopropulsión no es positiva. Se propone mantener el centro y reducir la relación de aspecto. Si se activa la condición de seguridad, se rechaza cuando el máximo normalizado de la configuración propuesta supera $\xi_{\mathrm{safe}}$.
+Los parámetros de ruido adimensionales son
+
+\begin{equation}
+	\eta^2=\frac{2D_0}{Rv_e},
+	\qquad
+	d_\varphi=\frac{D_{r,0}R}{v_e}.
+\end{equation}
+
+La densidad $\rho$, la intensidad de interacción
+$\widetilde\kappa$ y los parámetros de ruido no deben interpretarse
+como parámetros numéricos por ``elegir'', sino como variables de
+control del modelo que serán exploradas una vez cerrado el protocolo
+numérico.
+
+\section{Reglas de deformación}
+
+En cada barrido de deformación, una célula redonda prueba
+$n_{\mathrm{int}}$ orientaciones. Cada propuesta parte del mismo
+estado original, desplaza el centro en la dirección propuesta una
+distancia igual al aumento del semieje mayor y conserva el área.
+
+Una elongación se acepta si
+
+\begin{equation}
+	\max_{j\in\mathcal C_p}
+	\xi_{ij}^{(p)}
+	\leq
+	\xi_{\mathrm{cut}},
+\end{equation}
+
+donde $\mathcal C_p$ es el conjunto de candidatos de la grilla para
+la propuesta.
+
+Entre las propuestas válidas se elige aquella con menor máximo de
+superposición, sorteando en caso de empate. Por lo tanto,
+$n_{\mathrm{int}}$ forma parte de la regla de deformación:
+aumentarlo no constituye simplemente una mejora de precisión numérica,
+sino que puede modificar tanto la probabilidad de elongación como la
+configuración seleccionada.
+
+La contracción se solicita cuando la velocidad determinista proyectada
+sobre el eje de autopropulsión no es positiva. Se propone entonces una
+reducción de la relación de aspecto manteniendo fijo el centro celular.
+
+Para evitar que una contracción genere una configuración con
+superposición excesiva, puede imponerse la condición
+
+\begin{equation}
+	\max_{j\in\mathcal C_p}
+	\xi_{ij}^{\mathrm{post}}
+	\leq
+	\xi_{\mathrm{safe}}.
+\end{equation}
+
+El valor de $\xi_{\mathrm{safe}}$ no se fija todavía. Su efecto deberá
+estudiarse una vez seleccionado un paso temporal convergido,
+comparando diferentes niveles de permisividad de la contracción.
+Entre los valores de interés se encuentran
+$\xi_{\mathrm{safe}}=e^{-1}$, valores intermedios y
+$\xi_{\mathrm{safe}}=0.8$.
 
 \section{Estado de las decisiones}
+
+\subsection{Parámetros y elecciones fijas del modelo}
+
 \small
-\begin{longtable}{p{0.20\textwidth}p{0.26\textwidth}p{0.44\textwidth}}
-\toprule
-Cantidad & Estado o valor & Justificación y trabajo pendiente \\
-\midrule
-\endhead
-$\widetilde R$, $\widetilde v_e$ & $1$, $1$ & Fijos por el reescaleo. \\
-$\phi_{\max}$ & $2.7$ & Motivación experimental. \\
-$\gamma$ & $3$ & Valor usado en papers anteriores. \\
-$\xi_{\mathrm{cut}}$ & $e^{-1}$ & Concuerda mucho con la distancia de interacción, desarrollado en el análisis de vecinos. \\
-$\lambda$ & $0.1$ & Candidato motivado por el umbral teórico de monotonía, desarrollado en el análisis de fuerzas. \\
-$\xi_{\mathrm{safe}}$ & $0.8$ & Cercano al punto problemático, desarrollado en el análisis de fuerzas. \\
-$\kappa$ & Por elegir & . \\
-$\eta$, $d_\varphi$ & Por documentar/elegir & . \\
-Condición inicial & Aleatoria, redondas; $t_{\mathrm{stab}}=0$ & Protocolo principal. Sus transitorios forman parte del análisis desde el tiempo inicial. \\
-Deformación & Instantánea & Elegido como un primer modelo. \\
-$n_{\mathrm{int}}$ & Por elegir & . \\
-Período de deformación & Por fijar & . \\
-$\Delta t$ & $0.05$, exploratorio & Validar convergencia para los valores de interacción seleccionados; no asumir estabilidad para cualquier $\kappa$. \\
-\bottomrule
+\begin{longtable}
+	{p{0.22\textwidth}p{0.24\textwidth}p{0.44\textwidth}}
+	\toprule
+	Cantidad & Estado o valor & Justificación \\
+	\midrule
+	\endhead
+	
+	$\widetilde R$, $\widetilde v_e$
+	& $1$, $1$
+	& Fijados mediante el reescalado de longitud y tiempo. \\
+	
+	$\phi_{\max}$
+	& $2.7$
+	& Valor motivado por la morfología celular considerada. \\
+	
+	$\gamma$
+	& $3$
+	& Valor utilizado en el modelo de interacción de referencia. \\
+	
+	$\xi_{\mathrm{cut}}$
+	& $e^{-1}$
+	& Corresponde al contacto geométrico para células redondas idénticas
+	y proporciona un criterio común basado en la superposición normalizada.
+	La elección se desarrolla en el análisis de vecinos. \\
+	
+	Forma de $u_\lambda$
+	& Regularizada
+	& Se introduce una divergencia a superposición completa para evitar
+	la pérdida de repulsión de la interacción original a distancias muy
+	cortas. \\
+	
+	$\lambda$
+	& $1$ como modelo de referencia
+	& Corresponde al núcleo completamente regularizado.
+	El análisis teórico muestra que la monotonía se garantiza para
+	$\lambda\gtrsim0.0828$. La robustez frente a la elección de
+	$\lambda$ se estudiará posteriormente. \\
+	
+	Condición inicial
+	& Aleatoria, todas las células redondas
+	& Protocolo basal para estudiar la aparición espontánea de células
+	elongadas y movimiento colectivo. \\
+	
+	$t_{\mathrm{stab}}$
+	& $0$
+	& Los transitorios desde la condición inicial forman parte del
+	proceso que se desea estudiar. \\
+	
+	Deformación
+	& Instantánea
+	& Primera versión del mecanismo de cambio de forma. \\
+	
+	\bottomrule
 \end{longtable}
 \normalsize
+
+\subsection{Parámetros y protocolo por validar}
+
+\small
+\begin{longtable}
+	{p{0.22\textwidth}p{0.24\textwidth}p{0.44\textwidth}}
+	\toprule
+	Cantidad & Estado actual & Trabajo pendiente \\
+	\midrule
+	\endhead
+	
+	$\Delta t$
+	& En validación
+	& Estudiar convergencia temporal utilizando pasos progresivamente
+	menores antes de seleccionar el mayor valor compatible con el régimen
+	convergido. \\
+	
+	$T_{\mathrm{def}}$
+	& $0.1$ como valor de trabajo
+	& Verificar la sensibilidad de los observables a la frecuencia de los
+	intentos de deformación una vez fijado $\Delta t$. \\
+	
+	$n_{\mathrm{int}}$
+	& $1$ como regla basal
+	& Realizar un chequeo de sensibilidad frente a un número mayor de
+	propuestas. No se interpreta como un parámetro de convergencia
+	numérica. \\
+	
+	$\xi_{\mathrm{safe}}$
+	& Por determinar
+	& Comparar diferentes umbrales de seguridad de la contracción,
+	incluyendo $e^{-1}$, valores intermedios y $0.8$, utilizando un
+	$\Delta t$ previamente validado. \\
+	
+	$t_{\mathrm{final}}$
+	& $1500$ como valor de trabajo
+	& Verificar que la duración de las simulaciones sea suficiente para
+	caracterizar el régimen estacionario o cuasiestacionario de los
+	observables estudiados. \\
+	
+	\bottomrule
+\end{longtable}
+\normalsize
+
+\subsection{Variables de control}
+
+Las siguientes cantidades no se fijarán mediante la validación
+preliminar, sino que se utilizarán para explorar el comportamiento
+físico del modelo:
+
+\begin{equation}
+	\rho,
+	\qquad
+	\widetilde\kappa,
+	\qquad
+	\eta,
+	\qquad
+	d_\varphi.
+\end{equation}
+
+El número de células $N$ se mantendrá fijo en los estudios
+preliminares cuando sea posible. Posteriormente se variará cuando sea
+necesario estudiar efectos de tamaño finito.
+
+En ausencia de ruido se utilizará como referencia
+
+\begin{equation}
+	\eta=0,
+	\qquad
+	d_\varphi=0.
+\end{equation}
+
+Una vez completada la validación preliminar, se estudiará primero el
+comportamiento del sistema en el plano $(\rho,\widetilde\kappa)$.
+Posteriormente se analizará la respuesta frente a ruido traslacional
+y rotacional y, finalmente, se seleccionarán regiones de interés para
+un estudio de mayor resolución de las transiciones observadas.
 
 \end{document}
