@@ -4,6 +4,16 @@ This repository contains the numerical validation and systematic analysis of the
 
 The simulation model is implemented separately in the [`oncostreams`](https://github.com/gonzaloangaut/oncostreams) repository. This repository focuses on the analysis required to define, validate, and characterize the model.
 
+## Start here
+
+This is the **current analysis repository** for the oncostreams model.
+
+- [Model definition and units (PDF)](preliminary/model/model_and_units.pdf)
+- [Neighbor criterion](preliminary/neighbors/neighbors_definition.ipynb)
+- [Force regularization](preliminary/forces/force_core_analysis.ipynb)
+- [Integration-time-step validation](preliminary/delta_t/delta_t_analysis.ipynb)
+- [Processing scripts](scripts/processing/)
+
 ## Repository structure
 
 ### `preliminary/`
