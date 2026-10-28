@@ -43,7 +43,7 @@ def resolve_delta_t(
     filepath: Path,
     fallback: float | None = None,
 ) -> float:
-    """Infer delta_t from a parent directory such as 0_025_1.
+    """Infer delta_t from a parent directory such as delta_t_0_025.
 
     If no such directory is present, ``fallback`` can be supplied through
     the command-line ``--delta-t`` option.
@@ -104,13 +104,44 @@ def parse_force_parameters(force_name: str) -> dict:
 
     return parameters
 
-# Motion columns that should be present in every file
-MOTION_COLUMNS = [
+# Motion columns written by the corrected campaign.
+DISPLACEMENT_COLUMNS = [
     "mean_step_displacement",
     "mean_squared_step_displacement",
     "p95_step_displacement",
     "max_step_displacement",
     "msd_t0",
+]
+
+VELOCITY_COLUMNS = [
+    "mean_instantaneous_speed",
+    "rms_instantaneous_speed",
+    "p95_instantaneous_speed",
+    "max_instantaneous_speed",
+    "system_drift_speed",
+    "velocity_polarization",
+    "elongated_mean_instantaneous_speed",
+    "elongated_velocity_polarization",
+]
+
+MOTION_COLUMNS = [
+    *DISPLACEMENT_COLUMNS,
+    *VELOCITY_COLUMNS,
+]
+
+NONNEGATIVE_MOTION_COLUMNS = [
+    *DISPLACEMENT_COLUMNS,
+    "mean_instantaneous_speed",
+    "rms_instantaneous_speed",
+    "p95_instantaneous_speed",
+    "max_instantaneous_speed",
+    "system_drift_speed",
+    "elongated_mean_instantaneous_speed",
+]
+
+POLARIZATION_COLUMNS = [
+    "velocity_polarization",
+    "elongated_velocity_polarization",
 ]
 
 
@@ -290,7 +321,7 @@ def process_motion_files(
 
 # Sanity checks
 def validate_motion(data: pd.DataFrame) -> None:
-    """Perform basic checks on the processed motion observables."""
+    """Perform consistency checks on displacement and velocity observables."""
 
     duplicated = data.duplicated(
         subset=SNAPSHOT_KEYS,
@@ -298,8 +329,61 @@ def validate_motion(data: pd.DataFrame) -> None:
 
     negative_columns = {
         column: int((data[column] < 0).sum())
-        for column in MOTION_COLUMNS
+        for column in NONNEGATIVE_MOTION_COLUMNS
     }
+
+    invalid_polarizations = {
+        column: int(
+            (
+                data[column].notna()
+                & ~data[column].between(0.0, 1.0)
+            ).sum()
+        )
+        for column in POLARIZATION_COLUMNS
+    }
+
+    p95_above_max = int(
+        (
+            data["p95_instantaneous_speed"]
+            > data["max_instantaneous_speed"] + 1e-12
+        ).sum()
+    )
+
+    rms_above_max = int(
+        (
+            data["rms_instantaneous_speed"]
+            > data["max_instantaneous_speed"] + 1e-12
+        ).sum()
+    )
+
+    mean_above_rms = int(
+        (
+            data["mean_instantaneous_speed"]
+            > data["rms_instantaneous_speed"] + 1e-12
+        ).sum()
+    )
+
+    drift_above_mean = int(
+        (
+            data["system_drift_speed"]
+            > data["mean_instantaneous_speed"] + 1e-12
+        ).sum()
+    )
+
+    nonzero_mean = data["mean_instantaneous_speed"] > 0
+    expected_velocity_polarization = (
+        data.loc[nonzero_mean, "system_drift_speed"]
+        / data.loc[nonzero_mean, "mean_instantaneous_speed"]
+    )
+    polarization_identity_mismatches = int(
+        (
+            abs(
+                data.loc[nonzero_mean, "velocity_polarization"]
+                - expected_velocity_polarization
+            )
+            > 1e-10
+        ).sum()
+    )
 
     print("\nSanity checks:")
     print(
@@ -312,6 +396,34 @@ def validate_motion(data: pd.DataFrame) -> None:
             f"Negative values in {column}:",
             number_negative,
         )
+
+    for column, number_invalid in invalid_polarizations.items():
+        print(
+            f"Values outside [0, 1] in {column}:",
+            number_invalid,
+        )
+
+    print(
+        "Rows with p95 instantaneous speed above max:",
+        p95_above_max,
+    )
+    print(
+        "Rows with RMS instantaneous speed above max:",
+        rms_above_max,
+    )
+    print(
+        "Rows with mean instantaneous speed above RMS:",
+        mean_above_rms,
+    )
+    print(
+        "Rows with system drift speed above mean speed:",
+        drift_above_mean,
+    )
+    print(
+        "Rows violating velocity_polarization = "
+        "system_drift_speed / mean_instantaneous_speed:",
+        polarization_identity_mismatches,
+    )
 
 
 # Main
@@ -346,7 +458,7 @@ def main() -> None:
         default=None,
         help=(
             "Fallback integration timestep when it cannot be inferred "
-            "from a parent directory such as 0_05 or 0_025_1."
+            "from a parent directory such as delta_t_0_005 or delta_t_0_025."
         ),
     )
 

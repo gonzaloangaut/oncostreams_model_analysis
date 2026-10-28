@@ -35,8 +35,9 @@ FIELD_PATTERN = re.compile(
 
 STEP_PATTERN = re.compile(r"_step=(\d+)\.dat$")
 
-# Current delta-t runs are stored in directories such as
-# 0_1, 0_05, 0_025_1, 0_025_2, 0_01_1, ...
+# Delta-t runs are stored in directories such as
+# delta_t_0_001, delta_t_0_005, delta_t_0_025, delta_t_0_1.
+# The optional trailing numeric suffix remains supported for legacy runs.
 DELTA_T_DIR_PATTERN = re.compile(
     r"^(?:delta_t_)?0_(?P<fraction>\d+)(?:_\d+)?$"
 )
@@ -67,7 +68,7 @@ def resolve_delta_t(
     filepath: Path,
     fallback: float | None = None,
 ) -> float:
-    """Infer delta_t from a parent directory such as 0_025_1.
+    """Infer delta_t from a parent directory such as delta_t_0_025.
 
     If the path does not encode delta_t, ``fallback`` can be supplied through
     the command-line ``--delta-t`` option. This keeps the processor reusable
@@ -589,7 +590,7 @@ def main() -> None:
         default=None,
         help=(
             "Fallback integration timestep when it cannot be inferred "
-            "from a parent directory such as 0_05 or 0_025_1."
+            "from a parent directory such as delta_t_0_005 or delta_t_0_025."
         ),
     )
 

@@ -44,7 +44,7 @@ def resolve_delta_t(
     filepath: Path,
     fallback: float | None = None,
 ) -> float:
-    """Infer delta_t from a parent directory such as 0_025_1.
+    """Infer delta_t from a parent directory such as delta_t_0_025.
 
     If no such directory is present, ``fallback`` can be supplied through
     the command-line ``--delta-t`` option.
@@ -459,7 +459,7 @@ def main() -> None:
         default=None,
         help=(
             "Fallback integration timestep when it cannot be inferred "
-            "from a parent directory such as 0_05 or 0_025_1."
+            "from a parent directory such as delta_t_0_005 or delta_t_0_025."
         ),
     )
 
