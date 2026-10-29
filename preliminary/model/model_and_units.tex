@@ -118,6 +118,16 @@ resulta
 El origen de la regularización y su comportamiento a distancias cortas se
 discuten en el documento de fuerzas.
 
+Para el protocolo de producción se fija $\lambda=1$
+(\texttt{lambda\_core=1}). La elección se contrastó con
+$\lambda=0.1$ en una campaña de convergencia temporal. Aunque el núcleo más
+suave admite pasos temporales mayores, $\lambda=1$ mantiene una cola de
+superposiciones claramente menor y reduce la intervención de la regla de
+seguridad de contracción a menos del $1\%$ en las densidades analizadas. Por
+lo tanto, se prioriza el núcleo completamente regularizado por su papel físico
+en evitar configuraciones de superposición profunda, y no por conveniencia
+computacional.
+
 \section{Movimiento y elección de unidades}
 
 La dinámica es sobreamortiguada. Definimos los vectores
@@ -417,6 +427,24 @@ También debemos estudiar el paso temporal de integración y un paso temporal qu
 	=\frac{v_e}{R}T_{\mathrm{def}}.
 \end{equation}
 
+La convergencia temporal se estudió para
+$\Delta t\in\{0.001,0.002,0.005,0.01,0.025,0.05,0.1\}$, con
+$N=1000$, 64 realizaciones por densidad y
+$\rho\in\{0.75,0.80,0.84,0.90\}$. Para $\lambda=1$, las medias de
+ensamble de los observables macroscópicos, junto con los diagnósticos de
+superposición y velocidad mecánica instantánea, forman un régimen estable
+hasta $\Delta t\simeq0.01$. El valor $\Delta t=0.025$ se interpreta como una
+zona limítrofe, mientras que para $\Delta t\geq0.05$ aparecen desviaciones
+claras. Se adopta por tanto
+
+\begin{equation}
+	\boxed{\Delta t=0.01}
+\end{equation}
+
+como paso temporal de producción. Esta elección conserva un margen respecto
+del comienzo de las desviaciones y reduce sustancialmente el costo frente a
+los pasos usados como referencia de convergencia.
+
 \subsection{Conclusión}
 
 El reescalado permite separar las cantidades que fijan las unidades,
@@ -456,7 +484,8 @@ La densidad $\rho$, la intensidad de interacción
 $\widetilde\kappa$ y los parámetros de ruido no deben interpretarse
 como parámetros numéricos por ``elegir'', sino como variables de
 control del modelo que serán exploradas una vez cerrado el protocolo
-numérico.
+numérico. Para las validaciones restantes se fija $\lambda=1$ y
+$\Delta t=0.01$.
 
 \section{Reglas de deformación}
 
@@ -498,16 +527,17 @@ superposición excesiva, puede imponerse la condición
 	\xi_{\mathrm{safe}}.
 \end{equation}
 
-El valor de $\xi_{\mathrm{safe}}$ no se fija todavía. Su efecto deberá
-estudiarse una vez seleccionado un paso temporal convergido,
-comparando diferentes niveles de permisividad de la contracción.
-Entre los valores de interés se encuentran
+Se utiliza $\xi_{\mathrm{safe}}=0.8$ como valor de trabajo, pero su valor
+definitivo todavía no se fija. Una vez seleccionados
+$n_{\mathrm{int}}$ y $T_{\mathrm{def}}$, se estudiará su efecto con el paso
+temporal ya validado, comparando distintos niveles de permisividad de la
+contracción. Entre los valores de interés se encuentran
 $\xi_{\mathrm{safe}}=e^{-1}$, valores intermedios y
 $\xi_{\mathrm{safe}}=0.8$.
 
 \section{Estado de las decisiones}
 
-\subsection{Parámetros y elecciones fijas del modelo}
+\subsection{Parámetros y elecciones ya fijadas}
 
 \small
 \begin{longtable}
@@ -541,13 +571,18 @@ $\xi_{\mathrm{safe}}=0.8$.
 	la pérdida de repulsión de la interacción original a distancias muy
 	cortas. \\
 	
-	$\lambda$
-	& $1$ como modelo de referencia
-	& Corresponde al núcleo completamente regularizado.
-	El análisis teórico muestra que la monotonía se garantiza para
-	$\lambda\gtrsim0.0828$. La robustez frente a la elección de
-	$\lambda$ se estudiará posteriormente. \\
+	$\lambda$ (\texttt{lambda\_core})
+	& $1$
+	& Corresponde al núcleo completamente regularizado. La comparación
+	con $\lambda=0.1$ mostró un mejor control de las superposiciones y una
+	intervención mucho menor de la regla de seguridad de contracción. \\
 	
+	$\Delta t$
+	& $0.01$
+	& Seleccionado dentro del régimen estable de medias de ensamble,
+	superposiciones y velocidades instantáneas. $0.025$ se considera
+	limítrofe y $\Delta t\geq0.05$ muestra artefactos claros. \\
+
 	Condición inicial
 	& Aleatoria, todas las células redondas
 	& Protocolo basal para estudiar la aparición espontánea de células
@@ -576,35 +611,28 @@ $\xi_{\mathrm{safe}}=0.8$.
 	\midrule
 	\endhead
 	
-	$\Delta t$
-	& En validación
-	& Estudiar convergencia temporal utilizando pasos progresivamente
-	menores antes de seleccionar el mayor valor compatible con el régimen
-	convergido. \\
+	$n_{\mathrm{int}}$
+	& $1$ como regla basal
+	& Próxima validación: estudiar la sensibilidad frente a un número mayor
+	de propuestas. No se interpreta como un parámetro de convergencia
+	numérica, porque modifica la regla de deformación. \\
 	
 	$T_{\mathrm{def}}$
 	& $0.1$ como valor de trabajo
-	& Verificar la sensibilidad de los observables a la frecuencia de los
-	intentos de deformación una vez fijado $\Delta t$. \\
-	
-	$n_{\mathrm{int}}$
-	& $1$ como regla basal
-	& Realizar un chequeo de sensibilidad frente a un número mayor de
-	propuestas. No se interpreta como un parámetro de convergencia
-	numérica. \\
+	& Una vez fijado $n_{\mathrm{int}}$, verificar la sensibilidad de los
+	observables a la frecuencia de los intentos de deformación. \\
 	
 	$\xi_{\mathrm{safe}}$
-	& Por determinar
-	& Comparar diferentes umbrales de seguridad de la contracción,
-	incluyendo $e^{-1}$, valores intermedios y $0.8$, utilizando un
-	$\Delta t$ previamente validado. \\
+	& $0.8$ como valor de trabajo
+	& Validar al final del protocolo de deformación, comparando $e^{-1}$,
+	valores intermedios y $0.8$ con $\Delta t=0.01$. \\
 	
 	$t_{\mathrm{final}}$
-	& $1500$ como valor de trabajo
-	& Verificar que la duración de las simulaciones sea suficiente para
-	caracterizar el régimen estacionario o cuasiestacionario de los
-	observables estudiados. \\
-	
+	& $2000$ como horizonte de trabajo
+	& La campaña de convergencia utilizó la ventana tardía
+	$1500\leq t\leq2000$. Resta verificar si este horizonte es suficiente
+	en los regímenes de evolución más lenta, en particular a alta densidad. \\
+
 	\bottomrule
 \end{longtable}
 \normalsize
