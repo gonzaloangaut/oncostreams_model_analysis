@@ -357,10 +357,16 @@ de las superposiciones, mientras que la elección de \(\Delta t\) se basa en la
 estabilidad de las estadísticas de ensamble y de los diagnósticos
 microscópicos.
 
-Con estas dos elecciones cerradas, la siguiente validación del protocolo será
-el número de orientaciones probadas en cada barrido de elongación,
-\(n_{\mathrm{int}}\). Luego se estudiará el período entre barridos de
-deformación \(T_{\mathrm{def}}\) y, finalmente, el umbral de seguridad de
-contracción \(\xi_{\mathrm{safe}}\).
+Durante esta campaña, la frecuencia de los intentos de deformación se mantuvo
+fija para aislar el efecto de \(\Delta t\) sobre la resolución de la dinámica
+mecánica. Por lo tanto, este estudio valida la elección del paso de integración
+y no una convergencia respecto de una escala temporal independiente de
+deformación.
+
+En el protocolo final, la morfología se actualiza una vez por paso de
+integración. Con \(\lambda=1\), \(\Delta t=0.01\) y
+\(n_{\mathrm{int}}=5\) fijados, el único parámetro preliminar restante por
+evaluar es el umbral de seguridad de contracción
+\(\xi_{\mathrm{safe}}\).
 
 \end{document}

@@ -12,6 +12,7 @@ This is the **current analysis repository** for the oncostreams model.
 - [Neighbor criterion](preliminary/neighbors/neighbors_definition.ipynb)
 - [Force regularization](preliminary/forces/force_core_analysis.ipynb)
 - [Integration-time-step validation](preliminary/delta_t/delta_t_analysis.ipynb)
+- [Internal deformation-attempt validation](preliminary/def_attempts/def_attempts_analysis.ipynb)
 - [Processing scripts](scripts/processing/)
 
 ## Repository structure
@@ -26,8 +27,10 @@ Current studies include:
 - `neighbors/`: definition and justification of the cell-neighbor criterion.
 - `forces/`: force regularization and contraction-overlap safety criterion.
 - `delta_t/`: numerical convergence with respect to the integration time step.
+- `def_attempts/`: sensitivity to the number of internal elongation proposals.
 
-The goal of this stage is to obtain a well-defined and numerically validated set of model parameters.
+The main numerical and deformation-rule choices are now fixed. The remaining
+preliminary parameter to assess is the contraction-overlap safety threshold.
 
 ### `scripts/processing/`
 
@@ -51,4 +54,7 @@ Local analysis directories such as `processed/` and `ovito_final/` are excluded 
 
 ## Status
 
-The project is currently in the numerical-validation stage.
+The project is in the final stage of preliminary validation. The remaining
+model-safety choice to assess is the contraction-overlap threshold; simulation
+horizons and late-time windows will be checked within each physical campaign
+rather than fixed as a universal model parameter.

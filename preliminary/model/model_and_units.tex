@@ -416,26 +416,30 @@ también en los parámetros adimensionales del ruido.
 Cambiar $v_e$ manteniendo fijos los coeficientes
 dimensionales de difusión modifica esos parámetros.
 
-\subsection{Paso temporal y período de deformación}
+\subsection{Paso temporal y actualización de la deformación}
 
-También debemos estudiar el paso temporal de integración y un paso temporal que nos diga cada cuánto tiempo se intentan deformar las células. Expresándo esto en las mismas unidades:
+El paso temporal adimensional de integración se define como
 
 \begin{equation}
-	\Delta\widetilde t=\frac{v_e}{R}\Delta t,
-	\qquad
-	\widetilde T_{\mathrm{def}}
-	=\frac{v_e}{R}T_{\mathrm{def}}.
+	\Delta\widetilde t
+	=
+	\frac{v_e}{R}\Delta t.
 \end{equation}
 
 La convergencia temporal se estudió para
 $\Delta t\in\{0.001,0.002,0.005,0.01,0.025,0.05,0.1\}$, con
 $N=1000$, 64 realizaciones por densidad y
-$\rho\in\{0.75,0.80,0.84,0.90\}$. Para $\lambda=1$, las medias de
-ensamble de los observables macroscópicos, junto con los diagnósticos de
-superposición y velocidad mecánica instantánea, forman un régimen estable
-hasta $\Delta t\simeq0.01$. El valor $\Delta t=0.025$ se interpreta como una
-zona limítrofe, mientras que para $\Delta t\geq0.05$ aparecen desviaciones
-claras. Se adopta por tanto
+$\rho\in\{0.75,0.80,0.84,0.90\}$.
+
+Durante esta validación, la frecuencia de los intentos de deformación se
+mantuvo fija para aislar el efecto del paso temporal sobre la integración de
+la dinámica mecánica. Para $\lambda=1$, las medias de ensamble de los
+observables macroscópicos, junto con los diagnósticos de superposición y
+velocidad mecánica instantánea, forman un régimen estable hasta
+$\Delta t\simeq0.01$. El valor $\Delta t=0.025$ se interpreta como una zona
+limítrofe, mientras que para $\Delta t\geq0.05$ aparecen desviaciones claras.
+
+Se adopta por tanto
 
 \begin{equation}
 	\boxed{\Delta t=0.01}
@@ -444,6 +448,11 @@ claras. Se adopta por tanto
 como paso temporal de producción. Esta elección conserva un margen respecto
 del comienzo de las desviaciones y reduce sustancialmente el costo frente a
 los pasos usados como referencia de convergencia.
+
+En el protocolo final no se introduce una escala temporal independiente para
+la deformación. El estado morfológico se actualiza una vez por paso de
+integración, utilizando por tanto la misma resolución temporal que la dinámica
+mecánica.
 
 \subsection{Conclusión}
 
@@ -489,7 +498,7 @@ $\Delta t=0.01$.
 
 \section{Reglas de deformación}
 
-En cada barrido de deformación, una célula redonda prueba
+En cada paso de integración, una célula redonda prueba
 $n_{\mathrm{int}}$ orientaciones. Cada propuesta parte del mismo
 estado original, desplaza el centro en la dirección propuesta una
 distancia igual al aumento del semieje mayor y conserva el área.
@@ -528,9 +537,9 @@ superposición excesiva, puede imponerse la condición
 \end{equation}
 
 Se utiliza $\xi_{\mathrm{safe}}=0.8$ como valor de trabajo, pero su valor
-definitivo todavía no se fija. Una vez seleccionados
-$n_{\mathrm{int}}$ y $T_{\mathrm{def}}$, se estudiará su efecto con el paso
-temporal ya validado, comparando distintos niveles de permisividad de la
+definitivo todavía no se fija. Con $n_{\mathrm{int}}=5$,
+$\Delta t=0.01$ y una actualización morfológica por paso de integración,
+resta estudiar su efecto comparando distintos niveles de permisividad de la
 contracción. Entre los valores de interés se encuentran
 $\xi_{\mathrm{safe}}=e^{-1}$, valores intermedios y
 $\xi_{\mathrm{safe}}=0.8$.
@@ -546,57 +555,69 @@ $\xi_{\mathrm{safe}}=0.8$.
 	Cantidad & Estado o valor & Justificación \\
 	\midrule
 	\endhead
-	
+
 	$\widetilde R$, $\widetilde v_e$
 	& $1$, $1$
 	& Fijados mediante el reescalado de longitud y tiempo. \\
-	
+
 	$\phi_{\max}$
 	& $2.7$
 	& Valor motivado por la morfología celular considerada. \\
-	
+
 	$\gamma$
 	& $3$
 	& Valor utilizado en el modelo de interacción de referencia. \\
-	
+
 	$\xi_{\mathrm{cut}}$
 	& $e^{-1}$
 	& Corresponde al contacto geométrico para células redondas idénticas
 	y proporciona un criterio común basado en la superposición normalizada.
 	La elección se desarrolla en el análisis de vecinos. \\
-	
+
 	Forma de $u_\lambda$
 	& Regularizada
 	& Se introduce una divergencia a superposición completa para evitar
 	la pérdida de repulsión de la interacción original a distancias muy
 	cortas. \\
-	
+
 	$\lambda$ (\texttt{lambda\_core})
 	& $1$
 	& Corresponde al núcleo completamente regularizado. La comparación
 	con $\lambda=0.1$ mostró un mejor control de las superposiciones y una
 	intervención mucho menor de la regla de seguridad de contracción. \\
-	
+
 	$\Delta t$
 	& $0.01$
 	& Seleccionado dentro del régimen estable de medias de ensamble,
 	superposiciones y velocidades instantáneas. $0.025$ se considera
 	limítrofe y $\Delta t\geq0.05$ muestra artefactos claros. \\
 
+	$n_{\mathrm{int}}$
+	& $5$
+	& Menor número de propuestas internas dentro del plateau práctico observado
+	en la fracción elongada, la estructura de clusters y la probabilidad de
+	elongación. \\
+
+	Actualización de la deformación
+	& Una vez por paso de integración
+	& No se introduce una escala temporal independiente para la deformación.
+	En producción, el estado morfológico se actualiza en cada paso
+	$\Delta t=0.01$. \\
+
 	Condición inicial
 	& Aleatoria, todas las células redondas
 	& Protocolo basal para estudiar la aparición espontánea de células
 	elongadas y movimiento colectivo. \\
-	
+
 	$t_{\mathrm{stab}}$
 	& $0$
 	& Los transitorios desde la condición inicial forman parte del
 	proceso que se desea estudiar. \\
-	
+
 	Deformación
 	& Instantánea
 	& Primera versión del mecanismo de cambio de forma. \\
-	
+
 	\bottomrule
 \end{longtable}
 \normalsize
@@ -610,32 +631,19 @@ $\xi_{\mathrm{safe}}=0.8$.
 	Cantidad & Estado actual & Trabajo pendiente \\
 	\midrule
 	\endhead
-	
-	$n_{\mathrm{int}}$
-	& $1$ como regla basal
-	& Próxima validación: estudiar la sensibilidad frente a un número mayor
-	de propuestas. No se interpreta como un parámetro de convergencia
-	numérica, porque modifica la regla de deformación. \\
-	
-	$T_{\mathrm{def}}$
-	& $0.1$ como valor de trabajo
-	& Una vez fijado $n_{\mathrm{int}}$, verificar la sensibilidad de los
-	observables a la frecuencia de los intentos de deformación. \\
-	
+
 	$\xi_{\mathrm{safe}}$
 	& $0.8$ como valor de trabajo
-	& Validar al final del protocolo de deformación, comparando $e^{-1}$,
-	valores intermedios y $0.8$ con $\Delta t=0.01$. \\
-	
-	$t_{\mathrm{final}}$
-	& $2000$ como horizonte de trabajo
-	& La campaña de convergencia utilizó la ventana tardía
-	$1500\leq t\leq2000$. Resta verificar si este horizonte es suficiente
-	en los regímenes de evolución más lenta, en particular a alta densidad. \\
+	& Validar comparando $e^{-1}$, valores intermedios y $0.8$ con
+	$\Delta t=0.01$ y $n_{\mathrm{int}}=5$. \\
 
 	\bottomrule
 \end{longtable}
 \normalsize
+
+El horizonte temporal y la ventana utilizada para calcular observables
+tardíos se verificarán en cada campaña, ya que los tiempos de relajación
+pueden depender de las variables de control y del tamaño del sistema.
 
 \subsection{Variables de control}
 
