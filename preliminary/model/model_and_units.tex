@@ -492,9 +492,8 @@ Los parámetros de ruido adimensionales son
 La densidad $\rho$, la intensidad de interacción
 $\widetilde\kappa$ y los parámetros de ruido no deben interpretarse
 como parámetros numéricos por ``elegir'', sino como variables de
-control del modelo que serán exploradas una vez cerrado el protocolo
-numérico. Para las validaciones restantes se fija $\lambda=1$ y
-$\Delta t=0.01$.
+control del modelo. El protocolo preliminar queda cerrado con las
+elecciones resumidas al final de este documento.
 
 \section{Reglas de deformación}
 
@@ -536,13 +535,18 @@ superposición excesiva, puede imponerse la condición
 	\xi_{\mathrm{safe}}.
 \end{equation}
 
-Se utiliza $\xi_{\mathrm{safe}}=0.8$ como valor de trabajo, pero su valor
-definitivo todavía no se fija. Con $n_{\mathrm{int}}=5$,
-$\Delta t=0.01$ y una actualización morfológica por paso de integración,
-resta estudiar su efecto comparando distintos niveles de permisividad de la
-contracción. Entre los valores de interés se encuentran
-$\xi_{\mathrm{safe}}=e^{-1}$, valores intermedios y
-$\xi_{\mathrm{safe}}=0.8$.
+La comparación entre
+$\xi_{\mathrm{safe}}=e^{-1}$,
+$\xi_{\mathrm{safe}}=e^{-1/2}$ y
+$\xi_{\mathrm{safe}}=0.8$
+muestra que los dos primeros valores rechazan la gran mayoría de las
+contracciones y alteran directamente el balance morfológico. En cambio,
+$\xi_{\mathrm{safe}}=0.8$ limita las superposiciones extremas rechazando
+sólo alrededor del $1\,\%$ de las contracciones solicitadas. Se fija por tanto
+
+\begin{equation}
+	\boxed{\xi_{\mathrm{safe}}=0.8}.
+\end{equation}
 
 \section{Estado de las decisiones}
 
@@ -598,6 +602,12 @@ $\xi_{\mathrm{safe}}=0.8$.
 	en la fracción elongada, la estructura de clusters y la probabilidad de
 	elongación. \\
 
+	$\xi_{\mathrm{safe}}$
+	& $0.8$
+	& Umbral suficientemente permisivo para no controlar la dinámica
+	morfológica, pero capaz de impedir las contracciones que producirían
+	superposiciones extremas. \\
+
 	Actualización de la deformación
 	& Una vez por paso de integración
 	& No se introduce una escala temporal independiente para la deformación.
@@ -622,25 +632,7 @@ $\xi_{\mathrm{safe}}=0.8$.
 \end{longtable}
 \normalsize
 
-\subsection{Parámetros y protocolo por validar}
-
-\small
-\begin{longtable}
-	{p{0.22\textwidth}p{0.24\textwidth}p{0.44\textwidth}}
-	\toprule
-	Cantidad & Estado actual & Trabajo pendiente \\
-	\midrule
-	\endhead
-
-	$\xi_{\mathrm{safe}}$
-	& $0.8$ como valor de trabajo
-	& Validar comparando $e^{-1}$, valores intermedios y $0.8$ con
-	$\Delta t=0.01$ y $n_{\mathrm{int}}=5$. \\
-
-	\bottomrule
-\end{longtable}
-\normalsize
-
+Con estas elecciones queda cerrado el protocolo preliminar del modelo.
 El horizonte temporal y la ventana utilizada para calcular observables
 tardíos se verificarán en cada campaña, ya que los tiempos de relajación
 pueden depender de las variables de control y del tamaño del sistema.

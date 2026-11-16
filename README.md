@@ -13,6 +13,7 @@ This is the **current analysis repository** for the oncostreams model.
 - [Force regularization](preliminary/forces/force_core_analysis.ipynb)
 - [Integration-time-step validation](preliminary/delta_t/delta_t_analysis.ipynb)
 - [Internal deformation-attempt validation](preliminary/def_attempts/def_attempts_analysis.ipynb)
+- [Contraction-overlap safety validation](preliminary/xi_safe/xi_safe_analysis.ipynb)
 - [Processing scripts](scripts/processing/)
 
 ## Repository structure
@@ -28,9 +29,9 @@ Current studies include:
 - `forces/`: force regularization and contraction-overlap safety criterion.
 - `delta_t/`: numerical convergence with respect to the integration time step.
 - `def_attempts/`: sensitivity to the number of internal elongation proposals.
+- `xi_safe/`: validation of the contraction-overlap safety threshold.
 
-The main numerical and deformation-rule choices are now fixed. The remaining
-preliminary parameter to assess is the contraction-overlap safety threshold.
+The preliminary model-protocol validation is complete.
 
 ### `scripts/processing/`
 
@@ -44,7 +45,7 @@ After the preliminary validation is completed, the model will be studied through
 2. the response to translational and rotational noise;
 3. a high-resolution study of selected transitions, including finite-size effects when appropriate.
 
-These analyses will be added progressively as the numerical protocol is finalized.
+These analyses will be added progressively as the physical behavior of the model is characterized.
 
 ## Data
 
@@ -54,7 +55,16 @@ Local analysis directories such as `processed/` and `ovito_final/` are excluded 
 
 ## Status
 
-The project is in the final stage of preliminary validation. The remaining
-model-safety choice to assess is the contraction-overlap threshold; simulation
-horizons and late-time windows will be checked within each physical campaign
-rather than fixed as a universal model parameter.
+The preliminary model-protocol validation is complete.
+
+The fixed production choices are:
+
+- `lambda_core = 1`;
+- `delta_t = 0.01`;
+- `cell_max_def_attempts = 5`;
+- `contraction_overlap_safety_ratio = 0.8`;
+- morphology updated once per integration step.
+
+Simulation horizons and late-time windows will be checked within each physical
+campaign because relaxation times may depend on the control parameters and
+system size.
