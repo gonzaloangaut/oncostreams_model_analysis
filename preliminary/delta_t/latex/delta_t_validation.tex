@@ -65,12 +65,7 @@ hasta \(t=2000\). Los promedios tardíos se calcularon en la ventana
 1500\leq t\leq2000.
 \end{equation}
 
-Las mismas semillas se reutilizaron en toda la campaña. Sin embargo, para
-evaluar convergencia a tiempos largos no exigimos que dos trayectorias con la
-misma semilla permanezcan cercanas punto a punto: pequeñas diferencias
-numéricas pueden decorrelacionar trayectorias individuales en una dinámica
-colectiva no lineal. Por eso el criterio principal se basa en estadísticas de
-ensamble.
+Las mismas semillas se reutilizaron en toda la campaña.
 
 \section{Ventana temporal tardía}
 
@@ -362,11 +357,5 @@ fija para aislar el efecto de \(\Delta t\) sobre la resolución de la dinámica
 mecánica. Por lo tanto, este estudio valida la elección del paso de integración
 y no una convergencia respecto de una escala temporal independiente de
 deformación.
-
-En el protocolo final, la morfología se actualiza una vez por paso de
-integración. Con \(\lambda=1\), \(\Delta t=0.01\) y
-\(n_{\mathrm{int}}=5\) fijados, el único parámetro preliminar restante por
-evaluar es el umbral de seguridad de contracción
-\(\xi_{\mathrm{safe}}\).
 
 \end{document}

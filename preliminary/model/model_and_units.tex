@@ -123,10 +123,7 @@ Para el protocolo de producción se fija $\lambda=1$
 $\lambda=0.1$ en una campaña de convergencia temporal. Aunque el núcleo más
 suave admite pasos temporales mayores, $\lambda=1$ mantiene una cola de
 superposiciones claramente menor y reduce la intervención de la regla de
-seguridad de contracción a menos del $1\%$ en las densidades analizadas. Por
-lo tanto, se prioriza el núcleo completamente regularizado por su papel físico
-en evitar configuraciones de superposición profunda, y no por conveniencia
-computacional.
+seguridad de contracción a menos del $1\%$ en las densidades analizadas. (Esto está mejor explicado en el documento del análisis del paso temporal).
 
 \section{Movimiento y elección de unidades}
 
@@ -436,8 +433,7 @@ mantuvo fija para aislar el efecto del paso temporal sobre la integración de
 la dinámica mecánica. Para $\lambda=1$, las medias de ensamble de los
 observables macroscópicos, junto con los diagnósticos de superposición y
 velocidad mecánica instantánea, forman un régimen estable hasta
-$\Delta t\simeq0.01$. El valor $\Delta t=0.025$ se interpreta como una zona
-limítrofe, mientras que para $\Delta t\geq0.05$ aparecen desviaciones claras.
+$\Delta t\simeq0.01$. El valor $\Delta t=0.025$ es un punto límite, mientras que para $\Delta t\geq0.05$ aparecen desviaciones claras.
 
 Se adopta por tanto
 
@@ -490,10 +486,7 @@ Los parámetros de ruido adimensionales son
 \end{equation}
 
 La densidad $\rho$, la intensidad de interacción
-$\widetilde\kappa$ y los parámetros de ruido no deben interpretarse
-como parámetros numéricos por ``elegir'', sino como variables de
-control del modelo. El protocolo preliminar queda cerrado con las
-elecciones resumidas al final de este documento.
+$\widetilde\kappa$ y los parámetros de ruido son parámetros libres.
 
 \section{Reglas de deformación}
 
@@ -521,9 +514,7 @@ aumentarlo no constituye simplemente una mejora de precisión numérica,
 sino que puede modificar tanto la probabilidad de elongación como la
 configuración seleccionada.
 
-La contracción se solicita cuando la velocidad determinista proyectada
-sobre el eje de autopropulsión no es positiva. Se propone entonces una
-reducción de la relación de aspecto manteniendo fijo el centro celular.
+Se propone entonces una reducción de la relación de aspecto manteniendo fijo el centro celular.
 
 Para evitar que una contracción genere una configuración con
 superposición excesiva, puede imponerse la condición
@@ -542,7 +533,7 @@ $\xi_{\mathrm{safe}}=0.8$
 muestra que los dos primeros valores rechazan la gran mayoría de las
 contracciones y alteran directamente el balance morfológico. En cambio,
 $\xi_{\mathrm{safe}}=0.8$ limita las superposiciones extremas rechazando
-sólo alrededor del $1\,\%$ de las contracciones solicitadas. Se fija por tanto
+sólo alrededor del $1\%$ de las contracciones solicitadas. Se fija por tanto
 
 \begin{equation}
 	\boxed{\xi_{\mathrm{safe}}=0.8}.
@@ -652,23 +643,5 @@ físico del modelo:
 	\qquad
 	d_\varphi.
 \end{equation}
-
-El número de células $N$ se mantendrá fijo en los estudios
-preliminares cuando sea posible. Posteriormente se variará cuando sea
-necesario estudiar efectos de tamaño finito.
-
-En ausencia de ruido se utilizará como referencia
-
-\begin{equation}
-	\eta=0,
-	\qquad
-	d_\varphi=0.
-\end{equation}
-
-Una vez completada la validación preliminar, se estudiará primero el
-comportamiento del sistema en el plano $(\rho,\widetilde\kappa)$.
-Posteriormente se analizará la respuesta frente a ruido traslacional
-y rotacional y, finalmente, se seleccionarán regiones de interés para
-un estudio de mayor resolución de las transiciones observadas.
 
 \end{document}
